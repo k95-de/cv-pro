@@ -374,6 +374,11 @@ const mouth = new THREE.Mesh(
   mouth.position.copy(p); mouth.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1), tan.normalize()); }
 scene.add(mouth);
 
+/* the end of the line opens into space (src/space.js) */
+let space = null;
+{ const p = new THREE.Vector3(), tan = new THREE.Vector3(); sampleAt(0.985, p, tan);
+  if (window.Space) { try { space = Space.make(p, tan); scene.add(space.group); } catch (e) { space = null; } } }
+
 /* ---------------------------------------------------------------- post-processing
    Scene -> offscreen target -> bright pass -> 2x separable blur (quarter res)
    -> composite (bloom + speed chromatic aberration + vignette + grain + the
@@ -551,6 +556,15 @@ function rigCamera(p) {
     camera.lookAt(_v2);
   } else {
     positionCamera(camT);
+    // leaving the pipe: drift out of the mouth into open space, eyes on the planet
+    const ex = smoother(ramp(p, 0.940, 1.0));
+    if (ex > 0 && space) {
+      camera.position.addScaledVector(camTan, ex * 48);
+      _v2.copy(camera.position).addScaledVector(camTan, 12);
+      _v2.lerp(space.planetPos, ex * 0.10);
+      camera.up.lerp(worldUp, ex);
+      camera.lookAt(_v2);
+    }
   }
   // speed-reactive lens: the view opens up as the flow accelerates
   const fov = BASE_FOV + Math.min(16, speed * 22);
@@ -963,6 +977,7 @@ function loop(now) {
   });
   const dm = Math.abs(camT - 0.985);
   mouth.material.opacity = Math.max(0, 1 - dm / 0.03) * 0.9;
+  if (space) space.update(nowS, smoother(ramp(progress, 0.85, 0.965)));
 
   // gate flash + chime when crossing a gate
   let fa = 0, fc = null;
