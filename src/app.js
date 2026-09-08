@@ -559,9 +559,14 @@ function rigCamera(p) {
     // leaving the pipe: drift out of the mouth into open space, eyes on the planet
     const ex = smoother(ramp(p, 0.940, 1.0));
     if (ex > 0 && space) {
+      // glide out, then a slow cinematic drift/orbit while parked at the end
       camera.position.addScaledVector(camTan, ex * 48);
+      const right = camTan.clone().cross(worldUp).normalize();
+      camera.position.addScaledVector(right, Math.sin(nowS * 0.11) * 7 * ex);
+      camera.position.addScaledVector(worldUp, Math.cos(nowS * 0.09) * 4 * ex);
       _v2.copy(camera.position).addScaledVector(camTan, 12);
-      _v2.lerp(space.planetPos, ex * 0.10);
+      _v2.lerp(space.planetPos, ex * 0.16);
+      _v2.addScaledVector(right, Math.sin(nowS * 0.07 + 1.0) * 3 * ex);
       camera.up.lerp(worldUp, ex);
       camera.lookAt(_v2);
     }
@@ -597,7 +602,7 @@ CV.stations.forEach((st, i) => {
         <div class="st-tools"></div>
         <ul class="st-bullets"></ul>
       </div>
-      ${hasImg ? '<div class="st-viz-wrap"><div class="st-photo"><img src="' + st.img + '" alt="" loading="lazy" /></div></div>' : ""}
+      ${hasImg ? '<div class="st-viz-wrap"><div class="st-photo" style="--img:url(' + st.img + ')"><img src="' + st.img + '" alt="" loading="lazy" /></div></div>' : ""}
       ${hasViz ? '<div class="st-viz-wrap"><canvas class="st-viz" width="560" height="340"></canvas></div>' : ""}
     </div>`;
   stage.appendChild(el);
