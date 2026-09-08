@@ -385,7 +385,7 @@ scene.add(mouth);
     new THREE.MeshBasicMaterial({ color: COL.blue, transparent: true, opacity: 0.10, wireframe: true, blending: THREE.AdditiveBlending, depthWrite: false }));
   rim.geometry.rotateX(Math.PI / 2); rim.position.z = -30;
   const exitG = new THREE.Group(); exitG.add(shell, rim); exitG.position.copy(p1); exitG.quaternion.copy(q1);
-  scene.add(exitG);
+  exitG.visible = false; scene.add(exitG); window.__exitG = exitG;
 }
 /* the end of the line opens into space (src/space.js) */
 let space = null;
@@ -869,6 +869,7 @@ window.previewAt = (f) => {
   if (f == null) return;
   target = progress = f; camT = dwellMap(f); nowS = performance.now() / 1000; rigCamera(f);
   if (space) space.update(nowS, smoother(ramp(f, 0.85, 0.965)));
+  if (window.__exitG) window.__exitG.visible = f > 0.945;
   updateOverlays(f, nowS); draw();
 };
 
@@ -998,6 +999,7 @@ function loop(now) {
   const dm = Math.abs(camT - 0.985);
   mouth.material.opacity = Math.max(0, 1 - dm / 0.03) * 0.9;
   if (space) space.update(nowS, smoother(ramp(progress, 0.85, 0.965)));
+  if (window.__exitG) window.__exitG.visible = progress > 0.945;
 
   // gate flash + chime when crossing a gate
   let fa = 0, fc = null;
