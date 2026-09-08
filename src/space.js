@@ -85,87 +85,131 @@ function make(origin, tangent) {
   const sky = new THREE.Mesh(new THREE.SphereGeometry(380, 48, 32), skyMat);
   group.add(sky);
 
-  /* ---- gas giant with atmosphere + ring ---- */
+  /* ---- particle Saturn: a point-cloud body + Kepler rings ----
+     Body: motes on a Fibonacci sphere (even coverage, no pole crowding).
+     Rings: motes whose angular speed goes as r^-1.5, so inner lanes visibly
+     outrun outer ones; gaps are carved out of the radius distribution; lane
+     brightness is banded on radius so stripes hold still while matter orbits. */
   const sunDir = new THREE.Vector3().copy(T).multiplyScalar(-0.3).addScaledVector(R, -0.8).addScaledVector(U, 0.5).normalize();
-  const planetMat = new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uStr: { value: 0 }, uSun: { value: sunDir },
-      cA: { value: new THREE.Color("#12327F") }, cB: { value: new THREE.Color("#5FA8FF") },
-      cC: { value: new THREE.Color("#E6FAFF") }, cD: { value: new THREE.Color("#A48BFF") },
-      cGold: { value: new THREE.Color("#FFE7B8") } },
-    vertexShader: `varying vec3 vN; varying vec3 vP; varying vec3 vV;
-      void main(){ vN = normalize(normalMatrix * normal); vP = position;
-        vec4 mv = modelViewMatrix * vec4(position, 1.0); vV = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }`,
-    fragmentShader: `precision highp float; varying vec3 vN; varying vec3 vP; varying vec3 vV;
-      uniform float uTime, uStr; uniform vec3 uSun, cA, cB, cC, cD, cGold;
-      ${NOISE}
-      void main(){
-        vec3 p = normalize(vP);
-        float lat = p.y;
-        // flowing bands: turbulence shears the latitude lines, slowly drifting
-        float turb = fbm(vec3(p.x * 2.6 + uTime * 0.03, lat * 8.0, p.z * 2.6)) - 0.5;
-        float turb2 = fbm(vec3(p.x * 7.0 - uTime * 0.02, lat * 20.0, p.z * 7.0) + 5.0) - 0.5;
-        float b1 = sin(lat * 22.0 + turb * 7.0 + turb2 * 2.0) * 0.5 + 0.5;
-        float b2 = sin(lat * 47.0 - turb * 4.0) * 0.5 + 0.5;
-        float storm = smoothstep(0.72, 0.95, fbm(p * 5.0 + vec3(uTime * 0.01, 0.0, 0.0) + 3.0));
-        vec3 col = mix(cA, cB, pow(b1, 1.4));
-        col = mix(col, cD, smoothstep(0.35, 0.75, b2) * 0.30 * (1.0 - b1));
-        col = mix(col, cC, storm * 0.7 + pow(b1, 6.0) * 0.25);
-        // polar ice caps with a rippling green aurora ring around them
-        col = mix(col, cC, smoothstep(0.78, 0.95, abs(lat)) * 0.7);
-        float auroraRing = smoothstep(0.62, 0.72, abs(lat)) * (1.0 - smoothstep(0.74, 0.84, abs(lat)));
-        float ripple = 0.5 + 0.5 * sin(atan(p.z, p.x) * 9.0 + uTime * 1.3 + turb * 6.0);
-        col += vec3(0.24, 1.0, 0.69) * auroraRing * ripple * 0.55;
-        vec3 N = normalize(vN);
-        vec3 L = normalize((viewMatrix * vec4(uSun, 0.0)).xyz);
-        float diff = max(0.0, dot(N, L));
-        float wrap = pow(diff, 0.55) * 1.2 + 0.08;
-        float fres = pow(1.0 - max(0.0, dot(N, vV)), 3.0);
-        // champagne-gold light along the terminator, icy blue atmosphere on the rim
-        float term = smoothstep(0.0, 0.25, diff) * (1.0 - smoothstep(0.25, 0.6, diff));
-        col = col * wrap + cGold * term * 0.16 + cB * fres * (0.35 + diff * 0.8) + cC * fres * fres * 0.5;
-        gl_FragColor = vec4(col * uStr, 1.0);
-      }`
-  });
-  const planet = new THREE.Mesh(new THREE.SphereGeometry(58, 64, 48), planetMat);
   const pPos = origin.clone().addScaledVector(T, 210).addScaledVector(R, 95).addScaledVector(U, 28);
-  const system = new THREE.Group();            // planet + ring share one axial tilt
+  const system = new THREE.Group();
   system.position.copy(pPos);
-  system.rotation.set(0.42, 0.0, 0.30);
+  system.rotation.set(0.95, 0.0, 0.38);   // open the ring toward the viewer
   group.add(system);
+
+  const moteTex = (() => { const c = document.createElement("canvas"); c.width = c.height = 64;
+    const g = c.getContext("2d"), rg = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    rg.addColorStop(0, "rgba(255,255,255,1)"); rg.addColorStop(0.3, "rgba(255,255,255,0.75)");
+    rg.addColorStop(0.7, "rgba(255,255,255,0.12)"); rg.addColorStop(1, "rgba(255,255,255,0)");
+    g.fillStyle = rg; g.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c); })();
+
+  const PR_ = 58;                                       // planet radius
+  const NB = isMobile ? 4500 : 11000;                   // body motes
+  const bPos = new Float32Array(NB * 3), bCol = new Float32Array(NB * 3), bSz = new Float32Array(NB);
+  const cSapph = new THREE.Color("#2F6BFF"), cIce = new THREE.Color("#DDF6FF"), cLav = new THREE.Color("#B39BFF"),
+        cAur = new THREE.Color("#3DFFB0"), cGold = new THREE.Color("#FFE27A"), tmp = new THREE.Color();
+  const GA = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < NB; i++) {
+    const y = 1 - (i / (NB - 1)) * 2, rr = Math.sqrt(1 - y * y), th = GA * i;
+    const x = Math.cos(th) * rr, z = Math.sin(th) * rr;
+    const jit = 1 + (Math.random() - 0.5) * 0.02;
+    bPos[i * 3] = x * PR_ * jit; bPos[i * 3 + 1] = y * PR_ * jit; bPos[i * 3 + 2] = z * PR_ * jit;
+    // banded colour by latitude with a little turbulence
+    const band = 0.5 + 0.5 * Math.sin(y * 22 + Math.sin(x * 4 + z * 3) * 1.6);
+    tmp.copy(cSapph).lerp(cIce, Math.pow(band, 1.6));
+    if (band < 0.35) tmp.lerp(cLav, (0.35 - band) * 1.2);
+    const pole = Math.max(0, Math.abs(y) - 0.72) / 0.28;
+    if (pole > 0) tmp.lerp(cAur, Math.min(1, pole * 0.9));
+    bCol[i * 3] = tmp.r; bCol[i * 3 + 1] = tmp.g; bCol[i * 3 + 2] = tmp.b;
+    bSz[i] = 0.7 + Math.random() * 0.6;
+  }
+  const bGeo = new THREE.BufferGeometry();
+  bGeo.setAttribute("position", new THREE.BufferAttribute(bPos, 3));
+  bGeo.setAttribute("aCol", new THREE.BufferAttribute(bCol, 3));
+  bGeo.setAttribute("aSz", new THREE.BufferAttribute(bSz, 1));
+  const bodyMat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { uTex: { value: moteTex }, uStr: { value: 0 }, uSun: { value: sunDir }, uSize: { value: isMobile ? 850 : 1150 } },
+    vertexShader: `attribute vec3 aCol; attribute float aSz; varying vec3 vC; varying float vA;
+      uniform float uSize; uniform vec3 uSun;
+      void main(){
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        vec3 n = normalize(normalMatrix * normalize(position));
+        vec3 v = normalize(-mv.xyz);
+        float facing = dot(n, v);                              // >0 near hemisphere
+        float limb = smoothstep(-0.15, 0.25, facing);          // far side fades out
+        float sun = max(0.0, dot(n, normalize((viewMatrix * vec4(uSun, 0.0)).xyz)));
+        float rim = pow(1.0 - max(0.0, facing), 2.0);          // dense limb glows
+        vA = limb * (0.22 + sun * 0.9 + rim * 0.9);
+        vC = aCol * (0.55 + sun * 0.6) + vec3(0.6, 0.9, 1.0) * rim * 0.35;
+        gl_PointSize = clamp(uSize * aSz / max(1.0, -mv.z), 1.0, 10.0);
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: `precision highp float; uniform sampler2D uTex; uniform float uStr; varying vec3 vC; varying float vA;
+      void main(){ float d = length(gl_PointCoord - 0.5); float a = smoothstep(0.5, 0.1, d); gl_FragColor = vec4(vC * a * vA * uStr, a * vA * uStr * 0.6); }`
+  });
+  const planet = new THREE.Points(bGeo, bodyMat); planet.frustumCulled = false;
   system.add(planet);
 
+  const NR = isMobile ? 9000 : 24000;                   // ring motes
+  const rR = new Float32Array(NR), rA = new Float32Array(NR), rH = new Float32Array(NR), rS = new Float32Array(NR);
+  const R0 = 76, R1 = 132;
+  const gaps = [[0.52, 0.575], [0.70, 0.715], [0.86, 0.875]];   // carved divisions (fractions of R0..R1)
+  for (let i = 0; i < NR; i++) {
+    let f;
+    do { f = Math.pow(Math.random(), 0.85); } while (gaps.some(g => f > g[0] && f < g[1]));
+    rR[i] = R0 + f * (R1 - R0); rA[i] = Math.random() * Math.PI * 2;
+    rH[i] = (Math.random() - 0.5) * 0.9; rS[i] = Math.random();
+  }
+  const rGeo = new THREE.BufferGeometry();
+  rGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(NR * 3), 3));
+  rGeo.setAttribute("aR", new THREE.BufferAttribute(rR, 1));
+  rGeo.setAttribute("aA", new THREE.BufferAttribute(rA, 1));
+  rGeo.setAttribute("aH", new THREE.BufferAttribute(rH, 1));
+  rGeo.setAttribute("aS", new THREE.BufferAttribute(rS, 1));
   const ringMat = new THREE.ShaderMaterial({
-    side: THREE.DoubleSide, transparent: true, depthWrite: false,
-    uniforms: { uStr: { value: 0 }, uSun: { value: sunDir }, cB: { value: new THREE.Color("#3B82F6") }, cC: { value: new THREE.Color("#5FE3FF") } },
-    vertexShader: `varying vec2 vUv; varying vec3 vW; void main(){ vUv = uv; vW = (modelMatrix * vec4(position,1.0)).xyz; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-    fragmentShader: `precision highp float; varying vec2 vUv; varying vec3 vW; uniform float uStr; uniform vec3 uSun, cB, cC;
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { uTex: { value: moteTex }, uStr: { value: 0 }, uTime: { value: 0 }, uSize: { value: isMobile ? 520 : 720 },
+      uR0: { value: R0 }, uR1: { value: R1 }, uPR: { value: PR_ },
+      cGold: { value: cGold }, cIce: { value: cIce }, cGreen: { value: cAur }, cBlue: { value: new THREE.Color("#5FA8FF") } },
+    vertexShader: `attribute float aR; attribute float aA; attribute float aH; attribute float aS; varying vec3 vC; varying float vA;
+      uniform float uTime, uSize, uR0, uR1, uPR; uniform vec3 cGold, cIce, cGreen, cBlue;
       ${NOISE}
       void main(){
-        float r = vUv.x;                                  // 0 inner .. 1 outer
-        float g = fbm(vec3(r * 40.0, 0.0, 1.0));
-        float lanes = smoothstep(0.35, 0.8, g) * (1.0 - smoothstep(0.92, 1.0, r)) * smoothstep(0.0, 0.08, r);
-        float gap = 1.0 - smoothstep(0.55, 0.58, r) * (1.0 - smoothstep(0.62, 0.65, r));
-        float a = lanes * gap * 0.55;
-        vec3 col = mix(mix(vec3(1.0, 0.89, 0.55), cB, smoothstep(0.0, 0.25, r)), cC, r) * (0.55 + 0.45 * g);
-        col = mix(col, vec3(0.45, 1.0, 0.75), smoothstep(0.78, 0.86, r) * (1.0 - smoothstep(0.86, 0.9, r)) * 0.6);
-        gl_FragColor = vec4(col * uStr, a * uStr);
-      }`
+        float f = (aR - uR0) / (uR1 - uR0);
+        float w = 1.9 * pow(aR / uR0, -1.5);                  // Kepler: inner lanes run faster
+        float ang = aA + uTime * w * 0.12;
+        vec3 p = vec3(cos(ang) * aR, aH, sin(ang) * aR);
+        // planet shadow + occlusion: motes behind the body (as seen from the camera) drop out
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        vec4 c0 = modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+        vec3 dp = mv.xyz - c0.xyz;
+        float behind = step(0.0, -dp.z + 0.0) * step(length(dp.xy), uPR * 0.98);
+        // lanes banded on radius: stripes hold still while matter orbits through them
+        float lane = 0.55 + 0.65 * fbm(vec3(f * 28.0, 0.5, 1.5));
+        float edge = smoothstep(0.0, 0.06, f) * (1.0 - smoothstep(0.93, 1.0, f));
+        vec3 col = mix(cGold, cIce, smoothstep(0.1, 0.55, f));
+        col = mix(col, cBlue, smoothstep(0.55, 0.9, f) * 0.6);
+        col = mix(col, cGreen, smoothstep(0.76, 0.80, f) * (1.0 - smoothstep(0.84, 0.88, f)) * 0.8);
+        float tw = 0.8 + 0.2 * sin(uTime * 3.0 + aS * 40.0);
+        vA = lane * edge * tw * (1.0 - behind);
+        vC = col;
+        gl_PointSize = clamp(uSize * (0.6 + aS * 0.8) / max(1.0, -mv.z), 1.2, 8.0);
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: `precision highp float; uniform sampler2D uTex; uniform float uStr; varying vec3 vC; varying float vA;
+      void main(){ float d = length(gl_PointCoord - 0.5); float a = smoothstep(0.5, 0.08, d); gl_FragColor = vec4(vC * a * vA * uStr * 1.35, a * vA * uStr * 0.9); }`
   });
-  const ringGeo = new THREE.RingGeometry(74, 128, 128, 1);
-  // remap uv.x to radius for the shader
-  { const uv = ringGeo.attributes.uv, pos = ringGeo.attributes.position;
-    for (let i = 0; i < uv.count; i++) { const x = pos.getX(i), y = pos.getY(i); uv.setXY(i, (Math.hypot(x, y) - 74) / (128 - 74), 0); } }
-  const ring = new THREE.Mesh(ringGeo, ringMat);
-  ring.rotation.x = Math.PI / 2;                 // equatorial plane of the tilted system
+  const ring = new THREE.Points(rGeo, ringMat); ring.frustumCulled = false;
   system.add(ring);
 
-  // atmosphere halo (additive sprite)
+  // soft atmosphere halo behind the body
   const haloTex = (() => { const c = document.createElement("canvas"); c.width = c.height = 256;
-    const g = c.getContext("2d"), rg = g.createRadialGradient(128, 128, 60, 128, 128, 128);
-    rg.addColorStop(0, "rgba(95,227,255,0.55)"); rg.addColorStop(0.45, "rgba(59,130,246,0.22)"); rg.addColorStop(1, "rgba(29,78,216,0)");
+    const g = c.getContext("2d"), rg = g.createRadialGradient(128, 128, 50, 128, 128, 128);
+    rg.addColorStop(0, "rgba(95,227,255,0.40)"); rg.addColorStop(0.5, "rgba(59,130,246,0.16)"); rg.addColorStop(1, "rgba(29,78,216,0)");
     g.fillStyle = rg; g.fillRect(0, 0, 256, 256); return new THREE.CanvasTexture(c); })();
   const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
-  halo.position.copy(pPos); halo.scale.set(170, 170, 1);
+  halo.position.copy(pPos); halo.scale.set(175, 175, 1);
   group.add(halo);
 
   /* ---- drifting dust ---- */
@@ -233,12 +277,11 @@ function make(origin, tangent) {
       group.visible = str > 0.002;
       if (!group.visible) return;
       skyMat.uniforms.uTime.value = t; skyMat.uniforms.uStr.value = str;
-      planetMat.uniforms.uTime.value = t; planetMat.uniforms.uStr.value = str;
-      ringMat.uniforms.uStr.value = str; halo.material.opacity = str * 0.9;
+      bodyMat.uniforms.uStr.value = str;
+      ringMat.uniforms.uStr.value = str; ringMat.uniforms.uTime.value = t; halo.material.opacity = str * 0.8;
       dustMat.uniforms.uTime.value = t; dustMat.uniforms.uStr.value = str;
       planet.rotation.y = t * 0.06;
       sky.rotation.y = t * 0.004; sky.rotation.x = Math.sin(t * 0.03) * 0.02;
-      ring.rotation.z = t * 0.01;
       moonMat.uniforms.uStr.value = str;
       moons.forEach(o => {
         const a = t * o.speed + o.phase;

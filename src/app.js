@@ -374,10 +374,24 @@ const mouth = new THREE.Mesh(
   mouth.position.copy(p); mouth.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1), tan.normalize()); }
 scene.add(mouth);
 
+/* exit shell: like the entrance, the pipe needs a body once we're outside it */
+{
+  const p1 = new THREE.Vector3(), t1 = new THREE.Vector3(); sampleAt(0.985, p1, t1);
+  const q1 = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), t1.clone().normalize());
+  const shell = new THREE.Mesh(new THREE.CylinderGeometry(3.58, 3.58, 60, 40, 1, true),
+    new THREE.MeshBasicMaterial({ color: 0x0C1730, side: THREE.FrontSide }));
+  shell.geometry.rotateX(Math.PI / 2); shell.position.z = -30;
+  const rim = new THREE.Mesh(new THREE.CylinderGeometry(3.6, 3.6, 60, 40, 1, true),
+    new THREE.MeshBasicMaterial({ color: COL.blue, transparent: true, opacity: 0.10, wireframe: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+  rim.geometry.rotateX(Math.PI / 2); rim.position.z = -30;
+  const exitG = new THREE.Group(); exitG.add(shell, rim); exitG.position.copy(p1); exitG.quaternion.copy(q1);
+  scene.add(exitG);
+}
 /* the end of the line opens into space (src/space.js) */
 let space = null;
 { const p = new THREE.Vector3(), tan = new THREE.Vector3(); sampleAt(0.985, p, tan);
-  if (window.Space) { try { space = Space.make(p, tan); scene.add(space.group); } catch (e) { space = null; } } }
+  if (window.Space) { try { space = Space.make(p, tan); scene.add(space.group); } catch (e) { console.error('space', e); space = null; } } }
+window.__space = () => ({ space, camera, THREE, renderer });
 
 /* ---------------------------------------------------------------- post-processing
    Scene -> offscreen target -> bright pass -> 2x separable blur (quarter res)
@@ -853,8 +867,9 @@ window.__dev = { get lenis() { return lenis; }, get target() { return target; },
 window.previewAt = (f) => {
   window.__lockP = (f == null) ? null : f;
   if (f == null) return;
-  target = progress = f; camT = dwellMap(f); rigCamera(f);
-  updateOverlays(f, performance.now() / 1000); draw();
+  target = progress = f; camT = dwellMap(f); nowS = performance.now() / 1000; rigCamera(f);
+  if (space) space.update(nowS, smoother(ramp(f, 0.85, 0.965)));
+  updateOverlays(f, nowS); draw();
 };
 
 function ramp(x, a, b) { return Math.max(0, Math.min(1, (x - a) / (b - a))); }
