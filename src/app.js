@@ -845,7 +845,7 @@ setLang((() => { try { return localStorage.getItem("flow_lang"); } catch (e) { r
         || (navigator.language || "en").slice(0, 2));
 
 /* ---------------------------------------------------------------- scroll */
-document.getElementById("scroll-space").style.height = "1100vh";
+document.getElementById("scroll-space").style.height = "1250vh";
 if (!reduced) {
   lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 0.85 });
   gsap.ticker.add((t) => lenis.raf(t * 1000));

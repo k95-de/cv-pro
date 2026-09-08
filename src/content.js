@@ -17,8 +17,8 @@ window.CV = {
   meta: {
     name: "Khaled Abdelhadi",
     tagline: {
-      en: "1D simulation engineer — cooling systems & thermal management",
-      de: "1D-Simulationsingenieur — Kühlsysteme & Thermomanagement"
+      en: "Mechanical Engineer — 3 Languages, 2 Degrees, 1 Long Curiosity",
+      de: "Maschinenbauingenieur — 3 Sprachen, 2 Abschlüsse, 1 lange Neugier"
     },
     intro: {
       en: "A career as one flow. Ride the coolant through the pipe — every junction is a step.",
@@ -59,14 +59,14 @@ window.CV = {
       role: { en: "Mechanical Engineering · 4 semesters", de: "Maschinenbau · 4 Semester" }
     },
     {
-      kind: "edu", mode: "iso", s: 0.166, t: 0.099,
+      kind: "edu", mode: "iso", s: 0.158, t: 0.090,
       years: "2015–18", dur: { en: "2015 – 2018 · 3 yrs", de: "2015 – 2018 · 3 Jahre" },
       org: { en: "Transfer to Alfaisal", de: "Wechsel zur Alfaisal" },
       place: { en: "Alfaisal University · Riyadh", de: "Alfaisal University · Riad" },
       role: { en: "Mechanical Engineering continues", de: "Maschinenbau geht weiter" }
     },
     {
-      kind: "job", mode: "aero", img: "assets/jobs/aero.webp", tools: ["PTC Creo","CNC","CFRP layup","Tensile testing"], s: 0.227, t: 0.168,
+      kind: "job", mode: "aero", img: "assets/jobs/aero.webp", tools: ["PTC Creo","CNC","CFRP layup","Tensile testing"], s: 0.211, t: 0.150,
       years: "2016–18", dur: { en: "Jun 2016 – Jun 2018 · 2 yrs", de: "Juni 2016 – Juni 2018 · 2 Jahre" },
       org: "Shell Eco Marathon Asia",
       place: { en: "Singapore", de: "Singapur" },
@@ -80,7 +80,7 @@ window.CV = {
       }
     },
     {
-      kind: "job", mode: "mold", img: "assets/jobs/mold.webp", tools: ["PTC Creo","CNC","Plastic-flow simulation","Steel moulds"], s: 0.288, t: 0.238,
+      kind: "job", mode: "mold", img: "assets/jobs/mold.webp", tools: ["PTC Creo","CNC","Plastic-flow simulation","Steel moulds"], s: 0.264, t: 0.210,
       years: "2017–18", dur: { en: "Jul 2017 – Jan 2018 · 7 mos", de: "Juli 2017 – Jan. 2018 · 7 Monate" },
       org: "Alfanar Electric",
       place: { en: "Riyadh, Saudi Arabia", de: "Riad, Saudi-Arabien" },
@@ -94,14 +94,14 @@ window.CV = {
       }
     },
     {
-      kind: "edu", gate: "done", mode: "iso", s: 0.350, t: 0.307,
+      kind: "edu", gate: "done", mode: "iso", s: 0.317, t: 0.270,
       years: "2018",
       org: { en: "B.Sc. Mechanical Engineering", de: "B.Sc. Maschinenbau" },
       place: { en: "Alfaisal University · Riyadh", de: "Alfaisal University · Riad" },
       role: { en: "Bachelor's completed", de: "Bachelor abgeschlossen" }
     },
     {
-      kind: "edu", gate: "start", mode: "iso", s: 0.411, t: 0.376,
+      kind: "edu", gate: "start", mode: "iso", s: 0.370, t: 0.330,
       years: "2019",
       org: { en: "Master's begins", de: "Master beginnt" },
       place: { en: "Esslingen University · Germany", de: "Hochschule Esslingen · Deutschland" },
@@ -109,7 +109,7 @@ window.CV = {
               de: "Design & Development — Mechanical & Automotive Engineering" }
     },
     {
-      kind: "job", mode: "battery", img: "assets/jobs/battery.webp", tools: ["JIRA","ASPICE / V-cycle","BMS","Project KPIs"], s: 0.472, t: 0.445,
+      kind: "job", mode: "battery", img: "assets/jobs/battery.webp", tools: ["JIRA","ASPICE / V-cycle","BMS","Project KPIs"], s: 0.423, t: 0.390,
       years: "2020", dur: { en: "Jan 2020 – Aug 2020 · 8 mos", de: "Jan. 2020 – Aug. 2020 · 8 Monate" },
       org: "A123 Systems",
       place: { en: "Stuttgart, Germany", de: "Stuttgart, Deutschland" },
@@ -123,7 +123,7 @@ window.CV = {
       }
     },
     {
-      kind: "job", mode: "stress", img: "assets/jobs/stress.webp", tools: ["Altair HyperWorks","FEA","CFRP monocoque","BOM"], s: 0.533, t: 0.515,
+      kind: "job", mode: "stress", img: "assets/jobs/stress.webp", tools: ["Altair HyperWorks","FEA","CFRP monocoque","BOM"], s: 0.476, t: 0.450,
       years: "2020", dur: { en: "Mar 2020 – Aug 2020 · 6 mos", de: "März 2020 – Aug. 2020 · 6 Monate" },
       org: "Esslingen Rennstall",
       place: { en: "Esslingen, Germany", de: "Esslingen, Deutschland" },
@@ -137,7 +137,7 @@ window.CV = {
       }
     },
     {
-      kind: "job", mode: "emotor", img: "assets/jobs/emotor.webp", tools: ["GT-SUITE","3D→1D","Oil circuit","Drive-cycle validation"], s: 0.594, t: 0.584,
+      kind: "job", mode: "emotor", img: "assets/jobs/emotor.webp", tools: ["GT-SUITE","3D→1D","Oil circuit","Drive-cycle validation"], s: 0.529, t: 0.510,
       years: "2020–21", dur: { en: "Oct 2020 – Mar 2021 · 6 mos", de: "Okt. 2020 – März 2021 · 6 Monate" },
       org: "MAN Truck & Bus",
       place: { en: "Nuremberg, Germany", de: "Nürnberg, Deutschland" },
@@ -151,14 +151,14 @@ window.CV = {
       }
     },
     {
-      kind: "edu", gate: "done", mode: "iso", s: 0.655, t: 0.653,
+      kind: "edu", gate: "done", mode: "iso", s: 0.582, t: 0.570,
       years: "2021",
       org: { en: "M.Eng. Mechanical & Automotive Engineering", de: "M.Eng. Mechanical & Automotive Engineering" },
       place: { en: "Esslingen University · Germany", de: "Hochschule Esslingen · Deutschland" },
       role: { en: "Master's completed", de: "Master abgeschlossen" }
     },
     {
-      kind: "job", mode: "flux", img: "assets/jobs/flux.webp", tools: ["ANSYS Maxwell","GT-SUITE","Loss maps","Hotspots"], s: 0.717, t: 0.722,
+      kind: "job", mode: "flux", img: "assets/jobs/flux.webp", tools: ["ANSYS Maxwell","GT-SUITE","Loss maps","Hotspots"], s: 0.635, t: 0.630,
       years: "2021–22", dur: { en: "Dec 2021 – May 2022 · 6 mos", de: "Dez. 2021 – Mai 2022 · 6 Monate" },
       org: "MAN Truck & Bus",
       place: { en: "Nuremberg, Germany", de: "Nürnberg, Deutschland" },
@@ -172,7 +172,7 @@ window.CV = {
       }
     },
     {
-      kind: "job", mode: "network", img: "assets/jobs/bus.webp", tools: ["GT-SUITE","3D CFD validation","Pump sizing","Cooling circuits"], s: 0.778, t: 0.792,
+      kind: "job", mode: "network", img: "assets/jobs/bus.webp", tools: ["GT-SUITE","3D CFD validation","Pump sizing","Cooling circuits"], s: 0.688, t: 0.690,
       years: "2022–25", dur: { en: "May 2022 – Apr 2025 · 3 yrs", de: "Mai 2022 – Apr. 2025 · 3 Jahre" },
       org: "MAN Truck & Bus",
       place: { en: "Nuremberg, Germany", de: "Nürnberg, Deutschland" },
@@ -186,7 +186,7 @@ window.CV = {
       }
     },
     {
-      kind: "job", mode: "network", img: "assets/jobs/network.webp", tools: ["GT-SUITE","Variant sub-models","Methodology","Team onboarding"], s: 0.839, t: 0.861,
+      kind: "job", mode: "network", img: "assets/jobs/network.webp", tools: ["GT-SUITE","Variant sub-models","Methodology","Team onboarding"], s: 0.741, t: 0.750,
       years: "2025–26", dur: { en: "Apr 2025 – Feb 2026 · 11 mos", de: "Apr. 2025 – Feb. 2026 · 11 Monate" },
       org: "TRATON R&D Germany",
       place: { en: "Nuremberg, Germany", de: "Nürnberg, Deutschland" },
@@ -200,7 +200,7 @@ window.CV = {
       }
     },
     {
-      kind: "edu", mode: "training", img: "assets/jobs/ai.webp", tools: ["AI tools & automation","Project management","Sales operations"], s: 0.900, t: 0.930,
+      kind: "edu", mode: "training", img: "assets/jobs/ai.webp", tools: ["AI tools & automation","Project management","Sales operations"], s: 0.794, t: 0.810,
       years: "2026", dur: { en: "Mar 2026 – Aug 2026 · 6 mos", de: "März 2026 – Aug. 2026 · 6 Monate" },
       org: { en: "Study & Growth", de: "Studium & Weiterentwicklung" },
       place: { en: "Self-study & continuous improvement", de: "Selbststudium & kontinuierliche Verbesserung" },
@@ -208,13 +208,32 @@ window.CV = {
               de: "KI · Projektmanagement · Sales Operations" },
       bullets: {
         en: ["Deepened practical AI skills — modern tools, workflows and automation.",
-             "Sharpened project-management and sales-operations fundamentals — bridging engineering and the business side."],
+             "Sharpened project-management and sales-operations fundamentals for the move into technology sales."],
         de: ["Praktische KI-Kompetenzen vertieft — moderne Tools, Workflows und Automatisierung.",
-             "Grundlagen in Projektmanagement und Sales Operations geschärft — Brücke zwischen Technik und Business."]
+             "Grundlagen in Projektmanagement und Sales Operations für den Wechsel in den Technologievertrieb geschärft."]
+      }
+    },
+    {
+      kind: "training", gate: "train", mode: "training", s: 0.847, t: 0.870,
+      years: "2026", dur: { en: "Sep 2026 – Dec 2026 · 4 mos", de: "Sep. 2026 – Dez. 2026 · 4 Monate" },
+      org: "Habmann",
+      place: { en: "Professional training", de: "Weiterbildung" },
+      role: { en: "Tech sales & consulting", de: "Technischer Vertrieb & Beratung" }
+    },
+    {
+      kind: "upcoming", mode: "bvs", img: "assets/jobs/bvs.webp", s: 0.900, t: 0.930,
+      years: { en: "from 2027", de: "ab 2027" },
+      org: "BVS",
+      place: { en: "Egypt", de: "Ägypten" },
+      role: { en: "Technology Sales Consultant", de: "Technology Sales Consultant" },
+      bullets: {
+        en: ["Bringing a simulation engineer's habit of proof to the customer side of technology.",
+             "The flow keeps moving — this junction is being built right now."],
+        de: ["Die Beweis-Denke eines Simulationsingenieurs auf die Kundenseite der Technologie bringen.",
+             "Die Strömung bleibt in Bewegung — diese Verzweigung entsteht gerade."]
       }
     }
   ],
-
   outro: {
     kicker: { en: "The flow continues", de: "Die Strömung geht weiter" },
     line:   { en: "A flow never stops — it finds new paths. Still curious, still building, already tracing the next challenge.",

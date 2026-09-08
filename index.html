@@ -73,13 +73,14 @@
 
   /* ---------------- hero ---------------- */
   #hero{ z-index:4; }
+  #hero{ --pw:clamp(170px,15.5vw,223px); --pr:clamp(1.4rem,13.9vw,200px); --pt:calc(50% - clamp(33px,3vw,39px)); }
   #hero .portrait{
-    position:absolute; right:clamp(1.4rem,7vw,9rem); top:50%; transform:translateY(-50%);
-    width:clamp(190px,24vw,340px); aspect-ratio:1/1; border-radius:3px; overflow:hidden;
+    position:absolute; right:var(--pr); top:var(--pt); transform:translateY(-50%);
+    width:var(--pw); aspect-ratio:1/1; border-radius:200px; overflow:hidden;
     -webkit-mask-image:radial-gradient(130% 130% at 50% 35%, #000 55%, transparent);
             mask-image:radial-gradient(130% 130% at 50% 35%, #000 55%, transparent);
   }
-  #hero .portrait img{ width:100%; height:100%; object-fit:cover; display:block;
+  #hero .portrait img{ width:100%; height:100%; object-fit:cover; object-position:49% 23%; display:block;
     filter:contrast(1.03) saturate(1.02); }
   #hero .portrait::after{ content:""; position:absolute; inset:0;
     background:linear-gradient(155deg, transparent 55%, rgba(7,10,15,.55));
@@ -214,8 +215,9 @@
   .station.has-video .st-viz-wrap{ display:none; }
 
   /* the route — positions list beside the portrait */
-  #route{ position:absolute; right:clamp(1.4rem,7vw,9rem); top:calc(50% + clamp(110px,14vw,190px));
-    width:clamp(200px,24vw,340px); }
+  #route{ position:absolute; right:calc(var(--pr) + var(--pw) / 2); transform:translateX(50%);
+    top:calc(var(--pt) + var(--pw) / 2 + 1.7rem);
+    width:max-content; max-width:clamp(200px,24vw,340px); }
   #route .r-title{ font-family:var(--font-display); font-size:.6rem; letter-spacing:.3em;
     text-transform:uppercase; color:var(--ink-dim); margin-bottom:.6rem; }
   #route ol{ list-style:none; display:flex; flex-direction:column; gap:.28rem; }
@@ -256,7 +258,7 @@
 
   @media (max-width:720px){
     #hero .portrait{ position:static; transform:none; margin-bottom:1.2rem; width:min(46vw,180px); }
-    #route{ position:static; width:auto; margin:.9rem 0 0; }
+    #route{ position:static; transform:none; width:auto; max-width:none; margin:.9rem 0 0; }
     #route ol{ gap:.16rem; }
     #route li{ font-size:.66rem; }
     .overlay .h-inner{ justify-content:flex-end; padding-bottom:3.5rem;
@@ -447,7 +449,7 @@
 <!-- HERO -->
 <div class="overlay" id="hero">
   <div class="h-inner">
-    <div class="portrait"><img src="assets/portrait.jpg" alt="Khaled Abdelhadi" /></div>
+    <div class="portrait"><img src="assets/portrait.jpg?v=9" alt="Khaled Abdelhadi" /></div>
     <div id="route"><div class="r-title">The route</div><ol></ol></div>
     <div class="h-eyebrow">Interactive CV</div>
     <h1><span class="w"><i style="--k:0">K</i><i style="--k:1">h</i><i style="--k:2">a</i><i style="--k:3">l</i><i style="--k:4">e</i><i style="--k:5">d</i></span><b><i style="--k:7">A</i><i style="--k:8">b</i><i style="--k:9">d</i><i style="--k:10">e</i><i style="--k:11">l</i><i style="--k:12">h</i><i style="--k:13">a</i><i style="--k:14">d</i><i style="--k:15">i</i></b></h1>
@@ -485,10 +487,10 @@
 <script src="lib/gsap.min.js"></script>
 <script src="lib/ScrollTrigger.min.js"></script>
 <script src="lib/lenis.min.js"></script>
-<script src="src/content.js?v=18"></script>
-<script src="src/scenes.js?v=18"></script>
-<script src="src/viz.js?v=18"></script>
-<script src="src/space.js?v=18"></script>
-<script src="src/app.js?v=18"></script>
+<script src="src/content.js?v=22"></script>
+<script src="src/scenes.js?v=22"></script>
+<script src="src/viz.js?v=22"></script>
+<script src="src/space.js?v=22"></script>
+<script src="src/app.js?v=22"></script>
 </body>
 </html>
